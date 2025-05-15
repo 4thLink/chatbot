@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>4th Link AI Chatbot</title>
+  <style>
+    body {
+      font-family: 'Roboto', Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background: #f4f4f4;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+    #chat-container {
+      width: 320px;
+      height: 450px;
+      background: #ffffff;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      display: flex;
+      flex-direction: column;
+    }
+    #chat-header {
+      background: #2c3e50; /* Dark blue for 4th Link branding */
+      color: #ffffff;
+      padding: 12px;
+      border-radius: 12px 12px 0 0;
+      text-align: center;
+      font-size: 18px;
+      font-weight: bold;
+    }
+    #chat-messages {
+      flex-grow: 1;
+      overflow-y: auto;
+      padding: 15px;
+      border-bottom: 1px solid #e0e0e0;
+      background: #fafafa;
+    }
+    #chat-messages p {
+      margin: 8px 0;
+      padding: 8px 12px;
+      border-radius: 8px;
+      max-width: 80%;
+      word-wrap: break-word;
+      font-size: 14px;
+    }
+    #chat-messages .user {
+      background: #d4e6f1; /* Light blue for user messages */
+      margin-left: auto;
+      text-align: right;
+    }
+    #chat-messages .bot {
+      background: #ffffff;
+      border: 1px solid #e0e0e0;
+      margin-right: auto;
+    }
+    #chat-input-container {
+      padding: 10px;
+      display: flex;
+      gap: 5px;
+      background: #ffffff;
+      border-radius: 0 0 12px 12px;
+    }
+    #chat-input {
+      flex-grow: 1;
+      padding: 8px;
+      border: 1px solid #cccccc;
+      border-radius: 5px;
+      outline: none;
+      font-size: 14px;
+    }
+    #chat-input:focus {
+      border-color: #2c3e50;
+    }
+    #send-button {
+      padding: 8px 12px;
+      background: #2c3e50; /* Matches header */
+      color: #ffffff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    #send-button:hover {
+      background: #1a252f; /* Darker shade on hover */
+    }
+    @media (max-width: 600px) {
+      #chat-container {
+        width: 90%;
+        height: 80vh;
+      }
+      #chat-messages p {
+        font-size: 13px;
+      }
+      #chat-input, #send-button {
+        font-size: 13px;
+      }
+    }
+  </style>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div id="chat-container">
+    <div id="chat-header">
+        <img src="https://raw.githubusercontent.com/4thLink/4thlinkchatbot/refs/heads/main/4th.png" alt="4th Link Logo" style="height: 24px; vertical-align: middle; margin-right: 8px;"> 4th Link Chatbot
+      </div>
+    <div id="chat-messages">
+      <p class="bot"><b>Phoebe:</b> Hello! Welcome to 4th Link. How can we assist you today?</p>
+    </div>
+    <div id="chat-input-container">
+      <input id="chat-input" type="text" placeholder="Type a message...">
+      <button id="send-button" onclick="sendMessage()">Send</button>
+    </div>
+  </div>
+  <script>
+    async function sendMessage() {
+      const input = document.getElementById('chat-input').value;
+      if (!input.trim()) return;
+      const messages = document.getElementById('chat-messages');
+      messages.innerHTML += `<p class="user"><b>You:</b> ${input}</p>`;
+      messages.innerHTML += `<p class="bot"><b>Bot:</b> Typing...</p>`;
+      messages.scrollTop = messages.scrollHeight;
+      try {
+        const response = await fetch('https://lucky-zebra-visually.ngrok-free.app/webhook-test/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message: input })
+        });
+        if (!response.ok) throw new Error('Network response was not ok');
+        const data = await response.json();
+        messages.innerHTML = messages.innerHTML.replace('<p class="bot"><b>Bot:</b> Typing...</p>', `<p class="bot"><b>Bot:</b> ${data.response}</p>`);
+        messages.scrollTop = messages.scrollHeight;
+      } catch (error) {
+        messages.innerHTML = messages.innerHTML.replace('<p class="bot"><b>Bot:</b> Typing...</p>', `<p class="bot" style="color: red;"><b>Error:</b> Sorry, something went wrong. Please try again later.</p>`);
+        messages.scrollTop = messages.scrollHeight;
+      }
+      document.getElementById('chat-input').value = '';
+    }
+    document.getElementById('chat-input').addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') sendMessage();
+    });
+  </script>
+</body>
+</html>
